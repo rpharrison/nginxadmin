@@ -1,0 +1,15 @@
+language: python
+
+python: 2.6.6
+
+branches:
+  only:
+    - master
+	
+env:
+  - VER_NGINX=1.8.0
+  
+before_install:
+
+install:
+  ./nginxinstaller install
