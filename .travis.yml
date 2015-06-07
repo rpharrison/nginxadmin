@@ -10,6 +10,8 @@ env:
   - VER_NGINX=1.8.0
 
 before_install:
+  - sudo apt-get update
+  - sudo apt-get install apache2
 
 install:
   - sudo python nginxinstaller install
