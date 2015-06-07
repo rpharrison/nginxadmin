@@ -12,7 +12,6 @@ env:
 before_install:
 
 install:
-  - cd "rpharrison/nginxadmin"
   - python nginxinstaller install
 
 script: cd ${TRAVIS_BUILD_DIR} && prove
