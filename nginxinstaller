@@ -1,0 +1,346 @@
+#!/usr/bin/env python
+# Nginx Admin Installer
+# Website: www.nginxcp.com
+#
+# Copyright (C) NGINXCP.COM.
+#
+import subprocess
+import os
+import sys
+import time
+import re
+
+sys.path.append('/scripts/')
+currentdir=os.getcwd()
+
+
+def findapacheversion():
+        proc = subprocess.Popen(["/usr/sbin/httpd", "-V"], stdout=subprocess.PIPE)
+        output = proc.communicate()[0]
+        m = re.search("Apache/(2\.[0-9]+\.[0-9]+)", output)
+        if not m:
+                print "Unsupported Apache version"
+                sys.exit(1)
+        return m.group(1)
+
+apache_version = findapacheversion()
+
+def uninstallmodule(name):
+        f=open('/usr/local/apache/conf/httpd.conf', 'r')
+        fl = f.readlines()
+        f.close
+        include="Include \"/usr/local/apache/conf/includes/" + name + ".conf\"\n"
+        if include in fl:
+                 fl.remove(include)
+                 f=open('/usr/local/apache/conf/httpd.conf', 'w')
+                 f.writelines(fl)
+                 f.close
+
+
+
+if len(sys.argv) > 1:
+	if sys.argv[1] == "uninstall":
+		subprocess.Popen("rm -f /usr/local/sbin/nginx", shell=True)
+		subprocess.Popen("rm -f /var/run/nginx.pid", shell=True)
+		subprocess.Popen("rm -rf /usr/local/nginx", shell=True)
+		subprocess.Popen("rm -rf /var/log/nginx", shell=True)
+        	subprocess.Popen("rm -rf /etc/nginx/", shell=True)
+
+        	subprocess.Popen("rm -f /etc/init.d/nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/init.d/nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc0.d/K25nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc1.d/K25nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc2.d/S55nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc3.d/S55nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc4.d/S55nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc5.d/S55nginx", shell=True)
+		subprocess.Popen("rm -f /etc/rc.d/rc6.d/K25nginx", shell=True)
+
+                subprocess.Popen("rm -f /etc/chkserv.d/nginx", shell=True)
+		subprocess.Popen("rm -f /var/run/chkservd/nginx", shell=True)
+                subprocess.Popen("rm -f /etc/logrotate.d/nginx", shell=True)
+
+		subprocess.Popen("rm -f /scripts/installmodrpaf", shell=True)
+		subprocess.Popen("rm -f /scripts/installmodremoteip", shell=True)
+        	subprocess.Popen("rm -f /scripts/postwwwacct", shell=True)
+        	subprocess.Popen("rm -f /scripts/iplist.py", shell=True)
+        	subprocess.Popen("rm -f /scripts/createvhosts.py", shell=True)
+		subprocess.Popen("rm -f /scripts/rebuildvhosts", shell=True)
+	       	subprocess.Popen("rm -f /scripts/xmlapi.py", shell=True)
+                subprocess.Popen("rm -f /scripts/after_apache_make_install", shell=True)
+                subprocess.Popen("rm -f /scripts/nginx_restart", shell=True)
+
+		subprocess.Popen("rm -f /usr/local/cpanel/hooks/addondomain/addaddondomain", shell=True)
+		subprocess.Popen("rm -f /usr/local/cpanel/hooks/addondomain/deladdondomain", shell=True)
+		subprocess.Popen("rm -f /usr/local/cpanel/hooks/park/park", shell=True)
+		subprocess.Popen("rm -f /usr/local/cpanel/hooks/park/unpark", shell=True)
+		subprocess.Popen("rm -f /usr/local/cpanel/hooks/subdomain/addsubdomain", shell=True)
+		subprocess.Popen("rm -f /usr/local/cpanel/hooks/subdomain/delsubdomain", shell=True)
+
+		subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/addon_nginx.cgi", shell=True)
+        	subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/nginx.php", shell=True)
+        	subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/config.png", shell=True)
+       		subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/cleanup.gif", shell=True)	
+        	subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/log.png", shell=True)
+        	subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/rebuild.png", shell=True)
+        	subprocess.Popen("rm -f /usr/local/cpanel/whostmgr/docroot/cgi/restartservices.gif", shell=True)
+		subprocess.Popen("rm -f /var/cpanel/apps/nginxcp.conf", shell=True)
+		
+		subprocess.Popen("/usr/local/cpanel/bin/register_hooks > /dev/null 2>&1", shell=True)
+                subprocess.Popen("sed -i 's/=8081/=80/g' /etc/chkserv.d/httpd", shell=True)
+		proc = subprocess.Popen("sed -i 's/apache_port=0.0.0.0:8081/apache_port=0.0.0.0:80/' /var/cpanel/cpanel.config", shell=True)
+		output = proc.communicate()
+                proc = subprocess.Popen("sed -i 's/#CustomLog/CustomLog/g' /var/cpanel/templates/apache2/vhost.local", shell=True)
+                output = proc.communicate()
+                proc = subprocess.Popen("sed -i 's/#CustomLog/CustomLog/g' /var/cpanel/templates/apache2/ssl_vhost.local", shell=True)
+                output = proc.communicate()
+                if apache_version.startswith("2.4.") and os.path.exists("/var/cpanel/templates/apache2_4"):
+                        proc = subprocess.Popen("sed -i 's/#CustomLog/CustomLog/g' /var/cpanel/templates/apache2_4/vhost.local", shell=True)
+                        output = proc.communicate()
+                        proc = subprocess.Popen("sed -i 's/#CustomLog/CustomLog/g' /var/cpanel/templates/apache2_4/ssl_vhost.local", shell=True)
+                        output = proc.communicate()
+                proc = subprocess.Popen("/scripts/rebuildhttpdconf > /dev/null 2>&1", shell=True)
+                output = proc.communicate()
+                proc = subprocess.Popen("sed -i 's/localhost:8081/localhost/g' /etc/init.d/httpd", shell=True)
+                output = proc.communicate()
+                proc = subprocess.Popen("sed -i 's/localhost:8081/localhost/g' /usr/local/apache/bin/apachectl", shell=True)
+                output = proc.communicate()
+                proc = subprocess.Popen("sed -i '/\/etc\/init.*.nginx/d' /etc/init.d/httpd", shell=True)
+                output = proc.communicate()
+                proc = subprocess.Popen("sed -i '/\/etc\/init.*.nginx/d' /usr/local/apache/bin/apachectl", shell=True)
+                output = proc.communicate()
+                proc = subprocess.Popen("sed -i 's/.*nginx.*//g' /etc/chkserv.d/chkservd.conf > /dev/null 2>&1", shell=True)
+                output = proc.communicate()
+
+                remoteipuninstall=uninstallmodule("remoteip")
+                rpafuninstall=uninstallmodule("rpaf")
+
+                proc = subprocess.Popen("/usr/local/cpanel/bin/apache_conf_distiller --update > /dev/null 2>&1", shell=True)
+                output = proc.communicate()
+                subprocess.Popen("/usr/local/cpanel/whostmgr/bin/whostmgr2 --updatetweaksettings > /dev/null 2>&1", shell=True)
+                time.sleep(5)
+                subprocess.Popen("rm -f /usr/local/apache/conf/includes/rpaf.conf", shell=True)
+                subprocess.Popen("rm -f /usr/local/apache/conf/includes/remoteip.conf", shell=True)
+		sys.exit()
+	elif sys.argv[1] == "install":
+		pass
+	else:	
+		print "Usage ./nginstaller [install | uninstall]" 
+		sys.exit()
+
+if len(sys.argv) == 1:
+	print "Usage ./nginstaller [install | uninstall]"
+	sys.exit()
+
+
+if os.path.exists('/root/.accesshash'):
+	pass
+else:
+        print "access key doesn't exist"
+	print "go to WHM > Cluster/Remote Access > Setup Remote Access Key"
+	print "and click on the Generate New Key button"
+        sys.exit(1)
+cv = open("/usr/local/cpanel/version", "r")
+cvstring = cv.read(5)
+cv.close
+if cvstring >= "11.28":
+	pass
+else:
+	print "Please upgrade cPanel to version 11.30 or above"
+	sys.exit()
+debug="off"
+if debug == "off":
+	disableoutput = "> /dev/null 2>&1"
+else:
+	disableoutput = ""
+
+
+srcpath=currentdir
+print srcpath
+nsrcpath = currentdir + "/nginx-1.8.0"
+ssrcpath = currentdir + "/setuptools-5.7"
+
+apache_version = findapacheversion()
+
+nginxconfigure = """ ./configure --with-http_flv_module --with-ipv6 --with-http_mp4_module --with-pcre=%s/pcre-8.35  --sbin-path=/usr/local/sbin  --conf-path=/etc/nginx/nginx.conf  --pid-path=/var/run/nginx.pid  --error-log-path=/var/log/nginx/error.log  --http-log-path=/var/log/nginx/access.log  --with-http_realip_module  --with-http_ssl_module  --http-client-body-temp-path=/tmp/nginx_client  --http-proxy-temp-path=/tmp/nginx_proxy  --http-fastcgi-temp-path=/tmp/nginx_fastcgi  --with-http_stub_status_module > /dev/null 2>&1""" % (srcpath)
+
+print "Welcome to the Nginx Admin installer......Starting Install"
+print "Please Wait ......."
+
+proc = subprocess.Popen("mkdir -p /usr/local/cpanel/hooks/addondomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/addaddondomain /usr/local/cpanel/hooks/addondomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /usr/local/cpanel/hooks/addondomain/addaddondomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/deladdondomain /usr/local/cpanel/hooks/addondomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /usr/local/cpanel/hooks/addondomain/deladdondomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/park /usr/local/cpanel/hooks/park > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /usr/local/cpanel/hooks/park/park > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/unpark /usr/local/cpanel/hooks/park > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /usr/local/cpanel/hooks/park/unpark > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/delsubdomain /usr/local/cpanel/hooks/subdomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /usr/local/cpanel/hooks/subdomain/delsubdomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/addsubdomain /usr/local/cpanel/hooks/subdomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /usr/local/cpanel/hooks/subdomain/addsubdomain > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("/usr/local/cpanel/bin/register_hooks > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/iplist.py /scripts/iplist.py > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/iplist.py > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/createvhosts.py /scripts/createvhosts.py > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/createvhosts.py > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/rebuildvhosts /scripts/rebuildvhosts > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/rebuildvhosts > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/xmlapi.py /scripts/xmlapi.py > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/xmlapi.py", shell=True)
+output = proc.communicate()
+
+if not apache_version.startswith("2.4."):
+        proc = subprocess.Popen("tar zxf mod_rpaf-0.6.tar.gz", shell=True, cwd=srcpath)
+        output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/installmodrpaf /scripts/ > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("chmod +x /scripts/installmodrpaf > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/installmodremoteip /scripts/ > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("chmod +x /scripts/installmodremoteip > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/after_apache_make_install /scripts/ > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/after_apache_make_install > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/nginx_restart /scripts/ > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/nginx_restart > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("sed -i 's/=80/=8081/g' /etc/chkserv.d/httpd", shell=True)
+output = proc.communicate()
+
+sedcurrentdir=currentdir.replace('/','\/')
+
+proc = subprocess.Popen("sed -i '4i srcpath=" + sedcurrentdir + "' /scripts/after_apache_make_install > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("sed -i '1i nginx:1' /etc/chkserv.d/chkservd.conf > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/nginx /etc/init.d/nginx ", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /etc/init.d/nginx", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/postwwwacct /scripts/postwwwacct", shell=True)
+output = proc.communicate()
+proc = subprocess.Popen("chmod +x /scripts/postwwwacct", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("tar -zxf pcre-8.35.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+output = proc.communicate()
+proc = subprocess.Popen("tar -zxf nginx-1.8.0.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+output = proc.communicate()
+proc = subprocess.Popen("chkconfig --add nginx", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen(nginxconfigure, shell=True, cwd=nsrcpath, stdout=None)
+output = proc.communicate()
+proc = subprocess.Popen("make > /dev/null 2>&1", shell=True, cwd=nsrcpath, stdout=None)
+output = proc.communicate()
+proc = subprocess.Popen("make install > /dev/null 2>&1", shell=True, cwd=nsrcpath, stdout=None)
+output = proc.communicate()
+
+proc = subprocess.Popen("rm -f /etc/nginx/nginx.conf > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/nginx.conf /etc/nginx/nginx.conf", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("rm -f /etc/nginx/proxy.inc > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/proxy.inc /etc/nginx/proxy.inc", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("rm -f /etc/nginx/microcache.inc > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/microcache.inc /etc/nginx/microcache.inc", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("tar -zxf setuptools-5.7.tar.gz", shell=True, cwd=srcpath, stdout=None)
+output = proc.communicate()
+
+proc = subprocess.Popen("python setup.py build > /dev/null 2>&1", shell=True, cwd=ssrcpath, stdout=None)
+output = proc.communicate()
+
+proc = subprocess.Popen("python setup.py install > /dev/null 2>&1", shell=True, cwd=ssrcpath, stdout=None)
+output = proc.communicate()
+
+proc = subprocess.Popen("easy_install PyYAML > /dev/null 2>&1", shell=True)
+output = proc.communicate()
+
+import time
+time.sleep(5)
+
+print "Generating vhosts..."
+proc = subprocess.Popen("/scripts/createvhosts.py", shell=True, stdout=None)
+output = proc.communicate()
+
+print "Installing WHM interface..."
+proc = subprocess.Popen("cp /" + currentdir + "/nginxcp.conf /var/cpanel/apps/nginxcp.conf", shell=True)
+output = proc.communicate()
+
+proc = subprocess.Popen("cp /" + currentdir + "/cpnginx/* /usr/local/cpanel/whostmgr/docroot/cgi", shell=True)
+output = proc.communicate()
+
+if apache_version.startswith("2.4.") and os.path.exists("/var/cpanel/templates/apache2_4"):
+        print "Installing mod_remoteip..."
+        remoteip_path = "/home/cpeasyapache/src/httpd-2.4/modules/metadata"
+        if not os.path.exists(remoteip_path):
+                print "RemoteIP module not found at: " + remoteip_path
+                sys.exit(1)
+        proc = subprocess.Popen("/usr/local/apache/bin/apxs -i -c -n mod_remoteip.so mod_remoteip.c > /dev/null 2>&1", shell=True, cwd=remoteip_path)
+        output = proc.communicate()
+else:
+        print "Installing mod_rpaf..."
+        proc = subprocess.Popen("/usr/local/apache/bin/apxs -i -c -n mod_rpaf-2.0.so mod_rpaf-2.0.c > /dev/null 2>&1", shell=True, cwd=srcpath + "/mod_rpaf-0.6")
+        output = proc.communicate()
+
+print "Updating cPanel Configuration"
+proc = subprocess.Popen(currentdir + '/nginxinstaller2 ' + sys.argv[1], shell=True, cwd=currentdir)
+output = proc.communicate()
