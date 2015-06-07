@@ -12,8 +12,7 @@ env:
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2
-  - su root
 install:
-  - ./nginxinstaller install
+  - sudo ./nginxinstaller install
 
 script: cd ${TRAVIS_BUILD_DIR} && prove
