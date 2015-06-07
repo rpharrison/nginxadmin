@@ -13,6 +13,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install apache2
 install:
-  - sudo ./nginxinstaller install
+  - sudo nginxinstaller install
 
 script: cd ${TRAVIS_BUILD_DIR} && prove
