@@ -12,6 +12,7 @@ env:
 before_install:
 
 install:
-  - python nginxinstaller install
+  - pwd && ls -a
+  - ./nginxinstaller install
 
 script: cd ${TRAVIS_BUILD_DIR} && prove
