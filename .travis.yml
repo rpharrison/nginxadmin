@@ -12,6 +12,7 @@ env:
 before_install:
 
 install:
-  ./nginxinstaller install
+  - cd nginxadmin
+  - ./nginxinstaller install
 
 script: cd ${TRAVIS_BUILD_DIR} && prove
