@@ -1,0 +1,11 @@
+#!/bin/sh
+# Nginx Admin Installer
+# Website: www.nginxcp.com
+#
+# Copyright (C) NGINXCP.COM.
+#
+rm -rf /etc/nginx/vhosts
+/scripts/createvhosts.py
+/etc/init.d/httpd restart
+echo "Regenerate vhosts completed"
+

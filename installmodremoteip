@@ -1,0 +1,47 @@
+#!/bin/bash
+# Nginx Admin Installer
+# Website: www.nginxcp.com
+#
+# Copyright (C) NGINXCP.COM.
+# 
+
+apache_version=`/usr/sbin/httpd -V 2>&1 | sed -n 's/.*Apache\/\(2\.[0-9]*\.[0-9]*\).*/\1/p'`
+
+remoteip_path="/home/cpeasyapache/src/httpd-2.4/modules/metadata"
+
+if [ ! -f "$remoteip_path/mod_remoteip.c" ]
+then
+     echo "RemoteIP module not found at $remoteip_path/mod_remoteip.c"
+     exit
+fi
+
+cd $remoteip_path
+
+/usr/local/apache/bin/apxs -i -c -n mod_remoteip.so mod_remoteip.c
+/usr/local/cpanel/bin/apache_conf_distiller --update
+
+/scripts/rebuildhttpdconf
+
+if grep "remoteip.conf" /usr/local/apache/conf/httpd.conf
+then
+    /scripts/rebuildippool > /dev/null 2>&1
+    LIST=$(/scripts/ipusage | awk '{print $1}' | while read ip; do echo -ne "RemoteIPInternalProxy ${ip}\n"; done)
+    cat > /usr/local/apache/conf/includes/remoteip.conf << EOF
+LoadModule remoteip_module modules/mod_remoteip.so
+#Mod_remoteip settings
+RemoteIPHeader X-Real-IP
+RemoteIPInternalProxy 127.0.0.1 $LIST
+EOF
+else
+    /scripts/rebuildippool
+    LIST=$(/scripts/ipusage | awk '{print $1}' | while read ip; do echo -ne "RemoteIPInternalProxy ${ip}\n"; done)
+cat > /usr/local/apache/conf/includes/remoteip.conf << EOF
+LoadModule remoteip_module modules/mod_remoteip.so
+#Mod_remoteip settings
+RemoteIPHeader X-Real-IP
+RemoteIPInternalProxy 127.0.0.1 $LIST
+EOF
+    echo "Include \"/usr/local/apache/conf/includes/remoteip.conf\""  >> /usr/local/apache/conf/httpd.conf
+fi
+
+/etc/init.d/httpd restart

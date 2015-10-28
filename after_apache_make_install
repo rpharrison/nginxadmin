@@ -1,0 +1,17 @@
+#!/bin/bash
+# Nginx Admin Installer
+# Website: www.nginxcp.com
+#
+# Copyright (C) NGINXCP.COM.
+#
+
+apache_version=`/usr/sbin/httpd -V 2>&1 | sed -n 's/.*Apache\/\(2\.[0-9]*\.[0-9]*\).*/\1/p'`
+
+echo $apache_version
+
+if [[ $apache_version =~ ^2\.4\. ]]
+then
+    /bin/bash /scripts/installmodremoteip
+else
+    /bin/bash /scripts/installmodrpaf
+fi

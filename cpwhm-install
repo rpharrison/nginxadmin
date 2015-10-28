@@ -1,0 +1,16 @@
+#!/bin/sh
+cd /usr/local/cpanel/whostmgr/docroot/cgi
+        rm -f cpnginx.tar
+        rm -f addon_nginx.cgi
+        rm -f nginx.php
+        rm -f config.png
+        rm -f log.png
+        rm -f rebuild.png
+        rm -f restartservices.gif
+wget http://nginxcp.com/cpnginx.tar
+tar -xf cpnginx.tar
+mv /usr/local/cpanel/whostmgr/docroot/cgi/cpnginx/* /usr/local/cpanel/whostmgr/docroot/cgi
+rm -rf /usr/local/cpanel/whostmgr/docroot/cgi/cpnginx	
+rm -rf cpnginx.tar
+echo "Done"
+

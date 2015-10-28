@@ -1,0 +1,12 @@
+# !/bin/sh
+# Nginx Admin Installer
+# Website: www.nginxcp.com
+
+clear
+echo " Patch for python yaml error";
+cd /etc/nginx/vhosts
+##SYSTEMARCH='lynx -dump http://www.cpanel.net/showip.cgi'
+echo -n "Ready to install Nginx Admin? [y/n]: "
+read -e IP;
+perl -pi -w -e 's/server_name(.*) "$IP"/server_name$1/g;' *;
+echo "Done"

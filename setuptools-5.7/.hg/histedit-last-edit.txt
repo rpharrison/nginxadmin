@@ -1,0 +1,15 @@
+edit 0739a1da7f11 2978 Move imports into header
+pick 7600ecd3914a 2979 Remove commented code
+pick fba32276bb6a 2980 Avoid trailing comments in pkg_resources.
+
+# Edit history between 0739a1da7f11 and fba32276bb6a
+#
+# Commits are listed from least to most recent
+#
+# Commands:
+#  p, pick = use commit
+#  e, edit = use commit, but stop for amending
+#  f, fold = use commit, but combine it with the one above
+#  d, drop = remove commit from history
+#  m, mess = edit message without changing commit content
+#

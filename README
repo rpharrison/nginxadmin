@@ -1,0 +1,60 @@
+##NginxInstaller 
+
+
+This script automates installation, and sets up hooks to add nginx vhosts when accounts are added(or removed).
+
+##Usage
+
+
+Installation
+
+./nginxinstaller [install | uninstall]
+
+
+
+
+
+Installer Files
+
+Cpanel Hooks
+
+Cpanel has functionality to hook into certain actions performed within Cpanel. This list of files are self-explanatory. They add/remove nginx vhosts depending on the action. Hooks are located in /usr/local/cpanel/hooks/
+
+addaddondomain
+deladdondomain
+addsubdomain
+delsubdomain
+park                
+unpark 
+
+
+This file is used for installing mod_rpaf during EA.
+
+/scripts/after_apache_make_install  
+
+
+The default nginx.conf
+
+/etc/nginx/nginx.conf    
+ 
+
+This script run after account creation or restorepkg. It creates a nginx vhost for that domain.
+
+/scripts/postwwwacct  
+
+Simple function for getting data out of WHM via it's XML API
+
+/scripts/xmlapi.py
+
+This is where the magic happens. This is the set of functions used for actually writing out the vhost files.
+
+/scripts/createvhosts.py            
+
+Custom init script
+
+/etc/init.d/nginx       
+
+The installer script.
+
+nginxinstaller
+

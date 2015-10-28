@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+# Nginx Admin Installer
+# Website: www.nginxcp.com
+#
+# Copyright (C) NGINXCP.COM.
+#
+import subprocess
+import sys
+import os
+import yaml
+from xml.dom import minidom
+#sys.path.append('/scripts')
+sys.path.append('/usr/local/cpanel/scripts')
+import createvhosts
+import xmlapi
+
+#filetest = open('/home/theturtl/ray', 'r')
+#doc = minidom.parse(filetest)
+doc = minidom.parse(sys.stdin)
+
+ipDOC = xmlapi.api("listips")
+parsedipDOC = minidom.parseString(ipDOC)
+iptaglist = parsedipDOC.getElementsByTagName('ip')
+iplist =[]
+
+q = 0
+while q < len(iptaglist):
+        iplist.append(str(iptaglist[q].childNodes[0].toxml()))
+        q = q + 1
+
+
+
+resulttaglist = doc.getElementsByTagName('result')
+resultlist =[]
+newdomaintaglist = doc.getElementsByTagName('param0')
+domain = newdomaintaglist[0].childNodes[0].toxml()
+usertaglist = doc.getElementsByTagName('USER')
+user = usertaglist[0].childNodes[0].toxml()
+DOC = xmlapi.api("accountsummary?user=" + user)
+parsedDOC = minidom.parseString(DOC)
+domaintaglist = parsedDOC.getElementsByTagName('domain')
+domain = domaintaglist[0].childNodes[0].toxml()
+docroot, yip, alias = createvhosts.getvars(domain)
+if iptaglist[0].childNodes[0].toxml() ==  iplist[0]:
+       createvhosts.writeconfshared(user, domain, docroot, yip, alias)
+else:
+       createvhosts.writeconfded(user, domain, docroot, yip, alias)
+proc = subprocess.Popen("/etc/init.d/nginx restart > /dev/null 2>&1", shell=True)
+
+

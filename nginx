@@ -1,0 +1,84 @@
+#! /bin/sh
+ulimit -n 65535
+# Description: Startup script for nginx webserver on Debian. Place in /etc/init.d and
+# run 'sudo update-rc.d nginx defaults', or use the appropriate command on your
+# distro.
+#
+#chkconfig: 2345 55 25
+#
+# Author:       Ryan Norbauer <ryan.norbauer@gmail.com>
+# Modified:     Geoffrey Grosenbach http://topfunky.com
+
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DESC="nginx daemon"
+NAME=nginx
+DAEMON=/usr/local/sbin/$NAME
+CONFIGFILE=/etc/nginx/nginx.conf
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Gracefully exit if the package has been removed.
+test -x $DAEMON || exit 0
+
+d_start() {
+  $DAEMON -c $CONFIGFILE || echo -n " already running"
+}
+
+d_stop() {
+  kill -INT `cat $PIDFILE` || echo -n " not running"
+}
+
+waitforexit() {
+ count=${2:-30}
+ while [ 0$count -gt 0 ]
+ do
+   PIDS=`ps -C$NAME --no-heading e | grep $DAEMON` || break
+   PIDS=`echo "$PIDS" | awk '{print $1}' | tr '\n' ' '`
+   echo Remaining processes: $PIDS
+   d_stop
+   sleep 2
+   count=`expr $count - 1`
+ done
+ if [ 0$count -eq 0 ];
+ then
+   echo Remaining processes: $PIDS
+   return 1
+ fi
+ return 0
+}
+
+d_reload() {
+  kill -HUP `cat $PIDFILE` || echo -n " can't reload"
+}
+
+case "$1" in
+  start|startssl|sslstart|start-SSL)
+        echo -n "Starting $DESC: $NAME"
+        d_start
+        echo "."
+        ;;
+  stop)
+        echo -n "Stopping $DESC: $NAME"
+        d_stop
+        echo "."
+        ;;
+  graceful)
+        echo -n "Reloading $DESC configuration..."
+        d_reload
+        echo "reloaded."
+  ;;
+  restart)
+        echo -n "Restarting $DESC: $NAME"
+	waitforexit "nginx" 20
+        d_start
+        echo "."
+        ;;
+  *)
+        echo "Usage: $SCRIPTNAME {start|stop|restart|reload}" >&2
+        exit 3
+        ;;
+esac
+
+exit 0
