@@ -224,7 +224,7 @@ proc = subprocess.Popen("chmod +x /scripts/xmlapi.py", shell=True)
 output = proc.communicate()
 
 if not apache_version.startswith("2.4."):
-        proc = subprocess.Popen("tar zxf mod_rpaf-0.6.tar.gz", shell=True, cwd=srcpath)
+        proc = subprocess.Popen("tar zxf mod_rpaf-0.8.4.tar.gz", shell=True, cwd=srcpath)
         output = proc.communicate()
 
 proc = subprocess.Popen("cp /" + currentdir + "/installmodrpaf /scripts/ > /dev/null 2>&1", shell=True)
@@ -338,7 +338,7 @@ if apache_version.startswith("2.4.") and os.path.exists("/var/cpanel/templates/a
         output = proc.communicate()
 else:
         print "Installing mod_rpaf..."
-        proc = subprocess.Popen("/usr/local/apache/bin/apxs -i -c -n mod_rpaf-2.0.so mod_rpaf-2.0.c > /dev/null 2>&1", shell=True, cwd=srcpath + "/mod_rpaf-0.6")
+        proc = subprocess.Popen("/usr/local/apache/bin/apxs -i -c -n mod_rpaf.so mod_rpaf.c > /dev/null 2>&1", shell=True, cwd=srcpath + "/mod_rpaf-0.8.4")
         output = proc.communicate()
 
 print "Updating cPanel Configuration"

@@ -5,11 +5,11 @@
 # Copyright (C) NGINXCP.COM.
 # 
 cd /usr/local/src
-wget -c  http://nginxcp.com/latest/nginxadmin.tar
-tar -xf nginxadmin.tar
-cd /usr/local/src/publicnginx/mod_rpaf-0.6
-#cd mod_rpaf-0.6/
-/usr/local/apache/bin/apxs -i -c -n mod_rpaf-2.0.so mod_rpaf-2.0.c
+wget -c  https://github.com/rpharrison/nginxadmin/archive/v5.2-mainline.tar.gz
+tar -xvf v5.2-mainline.tar.gz
+cd /usr/local/src/publicnginx/mod_rpaf-0.8.4
+#cd mod_rpaf-0.8.4/
+/usr/local/apache/bin/apxs -i -c -n mod_rpaf.so mod_rpaf.c
 /usr/local/cpanel/bin/apache_conf_distiller --update
 
 /scripts/rebuildhttpdconf
@@ -18,7 +18,7 @@ if grep "rpaf.conf"  /usr/local/apache/conf/httpd.conf ; then
 /scripts/rebuildippool > /dev/null 2>&1
 LIST=$(/scripts/ipusage | awk '{print $1}'|while read ip; do echo -ne "${ip} "; done)
 cat > /usr/local/apache/conf/includes/rpaf.conf << EOF
-LoadModule rpaf_module modules/mod_rpaf-2.0.so
+LoadModule rpaf_module modules/mod_rpaf.so
 #Mod_rpaf settings
 RPAFenable On
 RPAFproxy_ips 127.0.0.1 $LIST
@@ -29,7 +29,7 @@ else
 /scripts/rebuildippool 
 LIST=$(/scripts/ipusage | awk '{print $1}'|while read ip; do echo -ne "${ip} "; done)
 cat > /usr/local/apache/conf/includes/rpaf.conf << EOF
-LoadModule rpaf_module  modules/mod_rpaf-2.0.so
+LoadModule rpaf_module  modules/mod_rpaf.so
 #Mod_rpaf settings
 RPAFenable On
 RPAFproxy_ips 127.0.0.1 $LIST
