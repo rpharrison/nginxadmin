@@ -25,7 +25,7 @@ def api(arg):
 	try:
 		handle = urllib2.urlopen(req)
 	except IOError, e:
-		print "The Access key found but It looks like logins not working, Please regenerate it in WHM."
+		print "The Access key was found, but it looks like login's not working, Please regenerate it in WHM."
 		sys.exit(1)
 	thepage = handle.read()
 	return thepage
