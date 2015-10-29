@@ -1,7 +1,7 @@
 ##NginxInstaller 
 
 
-This script automates installation, and sets up hooks to add nginx vhosts when accounts are added(or removed).
+This script automates installation, and sets up hooks to add nginx vhosts when accounts are added (or removed).
 
 ##Usage
 
@@ -18,7 +18,7 @@ Installer Files
 
 Cpanel Hooks
 
-Cpanel has functionality to hook into certain actions performed within Cpanel. This list of files are self-explanatory. They add/remove nginx vhosts depending on the action. Hooks are located in /usr/local/cpanel/hooks/
+Cpanel has functionality to hook into certain actions performed within Cpanel. This list of files is self-explanatory. They add/remove nginx vhosts depending on the action. Hooks are located in /usr/local/cpanel/hooks/
 
 addaddondomain
 deladdondomain
