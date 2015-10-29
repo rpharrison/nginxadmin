@@ -1,6 +1,6 @@
 <?php
 ######################################################################################
-#  Copyright (C) 2012 NginxCP.com. All rights reserved.
+#  Copyright (C) 2015 NginxCP.com. All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ header("Content-Type: text/html\n\n");
 
 // *** Common variables ***
 $cpAppName = 'Nginx Admin';
-$cpAppVersion = '5.1 Stable';
+$cpAppVersion = '5.1 Mainline';
 $NGINX_VERSION= str_replace('nginx version: nginx/','',shell_exec('nginx -v 2>&1'));
 
 $user = getenv('REMOTE_USER');
@@ -113,7 +113,7 @@ echo "<p style=\"color: #009\"><b>Log Viewer - Showing Last {$l} Lines</b></p>";
 echo "<pre>{$var}</pre>";
 break;
 case "cleanup": 
-echo "<p style=\"color: #009\"><b>Temperary Files Cleanup:</b></p>";
+echo "<p style=\"color: #009\"><b>Temporary Files Cleanup:</b></p>";
 ejecutar("cleanup"); break;
 default:
 $run = "Down";
@@ -121,9 +121,9 @@ $var = shell_exec("ps -A");
 if(strstr($var,"nginx")) { $run = "UP"; }
 echo "Nginx Service Status: <font style=\"color: #0c0\"><b>{$run}</b></font>";
 ?>
-<p style="color: #0c0">To automated /tmp cleanup add bellow cron <br><b>0 */1 * * * /usr/sbin/tmpwatch -am 1 /tmp/nginx_client</b><br> via crontab -e command</p>
+<p style="color: #0c0">To automate /tmp cleanup add below cron <br><b>0 */1 * * * /usr/sbin/tmpwatch -am 1 /tmp/nginx_client</b><br> via crontab -e command</p>
 <p style="color: #03F"><b>About Nginx Admin</b></p>
-<p>Nginx Admin is WHM interface of Nginx installer for cPanel server. This plugin will increase your server performance and decrease the server Apache Load. So you can host more websites in a cPanel server than usual. <br>Nginx is known for its high performance, stability, rich feature set, simple configuration, and low resource consumption. <br> Unlike traditional servers, Nginx doesn't rely on threads to handle requests. Instead it uses a much more scalable event-driven architecture. This architecture uses small, but more importantly, predictable amounts of memory under load. <br></p>
+<p>Nginx Admin is a WHM interface of Nginx installer for cPanel server. This plugin will increase your server performance and decrease the server Apache Load. So you can host more websites in a cPanel server than usual. <br>Nginx is known for its high performance, stability, rich feature set, simple configuration, and low resource consumption. <br> Unlike traditional servers, Nginx doesn't rely on threads to handle requests. Instead it uses a much more scalable event-driven architecture. This architecture uses small, but more importantly, predictable amounts of memory under load. <br></p>
 <p>For Support Visit <a href="http://www.nginxcp.com/forums" target='_blank'>http://www.nginxcp.com/forums</a></p>
 <? } ?>
 
@@ -141,7 +141,7 @@ echo "Nginx Service Status: <font style=\"color: #0c0\"><b>{$run}</b></font>";
 </form>
 <!-- End PayPal Donations -->
 
-<p>Nginx Admin: v<?php echo $cpAppVersion; ?> <br>Nginx version: (<?php echo $NGINX_VERSION; ?>)</p><p>©2006-2014, <a href="http://www.nginxcp.com" 
+<p>Nginx Admin: v<?php echo $cpAppVersion; ?> <br>Nginx version: (<?php echo $NGINX_VERSION; ?>)</p><p>©2006-2015, <a href="http://www.nginxcp.com" 
 target='_blank'>NginxCP.com</a></p>
 </div>
 </body>
