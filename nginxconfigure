@@ -8,7 +8,6 @@ HN=$(uname -n)
 
 # compiler related
 CLANG='y'                     # Nginx and LibreSSL
-STRIPNGINX='y'               # set 'y' to strip nginx binary to reduce size
 NGINX_HTTP2=y                # Nginx http/2 patch https://community.centminmod.com/threads/4127/
 NGINX_SPDY=n                 # Nginx SPDY support
 NGINX_FLV=y                  # http://nginx.org/en/docs/http/ngx_http_flv_module.html
@@ -23,18 +22,16 @@ NGINX_PCREVER='8.37'         # Version of PCRE used for pcre-jit support in Ngin
 OPENSSL_VERSION='1.0.2d'   # Use this version of OpenSSL http://openssl.org/
 
 # LibreSSL
-LIBRESSL_SWITCH='n'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
+LIBRESSL_SWITCH='y'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
 LIBRESSL_VERSION='2.2.4'   # Use this version of LibreSSL http://www.libressl.org/
 ##################################
 
 function funct_nginxconfigure {
 
-if [[ "$CENTOSVER" = '6.0' || "$CENTOSVER" = '6.1' || "$CENTOSVER" = '6.2' || "$CENTOSVER" = '6.3' || "$CENTOSVER" = '6.4' || "$CENTOSVER" = '6.5' || "$CENTOSVER" = '6.6' || "$CENTOSVER" = '6.7' || "$CENTOSVER" = '6.8' || "$CENTOSVER" = '6.9' || "$CENTOSVER" = '7.0' || "$CENTOSVER" = '7.1' || "$CENTOSVER" = '7.2' || "$CENTOSVER" = '7.3' || "$CENTOSVER" = '7.4' || "$CENTOSVER" = '7.5' || "$CENTOSVER" = '7.6' || "$CENTOSVER" = '7.7' ]]; then
-
 	if [[ "$NGINX_HTTP2" = [yY] ]]; then	
 			NGINX_SPDY=n		
 			HTTPTWOOPT=' --with-http_v2_module'
-		fi
+	fi
 	else
 		HTTPTWOOPT=""
 	fi
@@ -43,31 +40,28 @@ if [[ "$CENTOSVER" = '6.0' || "$CENTOSVER" = '6.1' || "$CENTOSVER" = '6.2' || "$
 		LIBRESSLOPT=" --with-openssl=../libressl-${LIBRESSL_VERSION}"
 		OPENSSLOPT=""
 		LRT='-lrt '
+	fi
 	else
-		if [ "$NOSOURCEOPENSSL" == 'n' ]; then
 			LIBRESSLOPT=""
 			OPENSSLOPT=" --with-openssl=../openssl-${OPENSSL_VERSION}"
 			LRT=""
-		else
-			export BPATH=$DIR_TMP
-			export STATICLIBSSL="${BPATH}/staticlibssl"
-			LIBRESSLOPT=""
-			OPENSSLOPT=" --with-openssl=../openssl-${OPENSSL_VERSION}"
-			LRT=""
-		fi
+
 	fi
 
 	if [[ "$NGINX_SPDY" = [yY] ]]; then
 		SPDYOPT=" --with-http_spdy_module"
 		HTTPTWOOPT=""
 	else
+	    NGINX_HTTP2=n
 		SPDYOPT=""
 	fi
+	
 	if [[ "$NGINX_FLV" = [yY] ]]; then
 		FLVOPT=" --with-http_flv_module"
 	else
 		FLVOPT=""
-	fi	
+	fi
+	
 	if [[ "$NGINX_MP4" = [yY] ]]; then
 		MPOPT=" --with-http_mp4_module"
 	else
@@ -121,54 +115,13 @@ if [[ "$CENTOSVER" = '6.0' || "$CENTOSVER" = '6.1' || "$CENTOSVER" = '6.2' || "$
 	else
 		VTSOPT=""
 	fi
+	
 	if [[ "$NGINX_PCREJIT" = [yY] ]]; then
 		PCREJITOPT=" --with-pcre=../pcre-${NGINX_PCREVER} --with-pcre-jit"
 	else
 		PCREJITOPT=""
 	fi
-else
-	if [[ "$NGINX_HTTP2" = [yY] ]]; then	
-		# only apply Nginx HTTP/2 if Nginx version is >= 1.9.3 and <1.9.5 OR >= 1.9.5
-		if [[ "$NGX_VEREVAL" -ge '10903' && "$NGX_VEREVAL" -lt '10905' ]] || [[ "$NGX_VEREVAL" -ge '10905' ]]; then
-			NGINX_SPDY=n		
-			HTTPTWOOPT=' --with-http_v2_module'
-		fi
-	else
-		HTTPTWOOPT=""
-		if [[ "$NGX_VEREVAL" -lt '10903' ]]; then
-			NGINX_SPDY=y
-		fi		
-	fi
-	if [[ "$LIBRESSL_SWITCH" = [yY] ]]; then
-		LIBRESSLOPT=" --with-openssl=../libressl-${LIBRESSL_VERSION}"
-		OPENSSLOPT=""
-		LRT='-lrt '
-	else
-		LIBRESSLOPT=""
-		OPENSSLOPT=" --with-openssl=../openssl-${OPENSSL_VERSION}"
-		LRT=""
-	fi
-	if [[ "$NGINX_SPDY" = [yY] ]]; then
-		SPDYOPT=" --with-http_spdy_module"
-	else
-		SPDYOPT=""
-	fi	
-	if [[ "$NGINX_FLV" = [yY] ]]; then
-		FLVOPT=" --with-http_flv_module"
-	else
-		FLVOPT=""
-	fi		
-	if [[ "$NGINX_MP4" = [yY] ]]; then
-		MPOPT=" --with-http_mp4_module"
-	else
-		MPOPT=""
-	fi
-	if [[ "$NGINX_PCREJIT" = [yY] ]]; then
-		PCREJITOPT=""
-	else
-		PCREJITOPT=""
-	fi
-fi
+
 if [[ -d "${DIR_TMP}/nginx-${NGINX_VERSION}" && ! "$ngver" ]]; then
 	cd ${DIR_TMP}/nginx-${NGINX_VERSION}
 fi
@@ -203,34 +156,27 @@ if [[ "$CLANG" = [yY] ]]; then
 	if [[ ! -f /usr/bin/clang ]]; then
 		yum -q -y install clang clang-devel
 	fi
-	# ccache compiler has some initial overhead for compiles but speeds up subsequent
-	# recompiles. however on initial install ccache has no benefits, so for initial
-	# centmin mod install disabling ccache will in theory speed up first time installs
 	if [[ "$INITIALINSTALL" != [yY] ]]; then	
-		export CC="ccache /usr/bin/clang -ferror-limit=0"
-		export CXX="ccache /usr/bin/clang++ -ferror-limit=0"
-		export CCACHE_CPP2=yes
-		CLANG_CCOPT=' -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-const-variable -Wno-conditional-uninitialized -Wno-mismatched-tags -Wno-c++11-extensions -Wno-sometimes-uninitialized -Wno-parentheses-equality -Wno-tautological-compare -Wno-self-assign -Wno-deprecated-register -Wno-deprecated -Wno-invalid-source-encoding -Wno-pointer-sign -Wno-parentheses -Wno-enum-conversion'
-	else
 		export CC="/usr/bin/clang -ferror-limit=0"
 		export CXX="/usr/bin/clang++ -ferror-limit=0"
-		# export CCACHE_CPP2=yes
+
 		CLANG_CCOPT=' -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-const-variable -Wno-conditional-uninitialized -Wno-mismatched-tags -Wno-c++11-extensions -Wno-sometimes-uninitialized -Wno-parentheses-equality -Wno-tautological-compare -Wno-self-assign -Wno-deprecated-register -Wno-deprecated -Wno-invalid-source-encoding -Wno-pointer-sign -Wno-parentheses -Wno-enum-conversion'
 	fi
 else
 	CLANG_CCOPT=""
 fi
+
 #    ASK "Would you like to compile nginx with IPv6 support? [y/n] "
 #    if [[ "$asknginxipv" = [yY] ]]; then
       if [[ "$NGINX_IPV" = [yY] ]]; then
       	pwd
       	echo "nginx configure options:"
-      	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
-		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+      	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
     else
     	pwd
     	echo "nginx configure options:"
-    	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
-		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}{OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+    	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}{OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
     fi   
 }
