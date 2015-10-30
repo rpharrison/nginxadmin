@@ -1,23 +1,10 @@
 #!/bin/sh
 
+NGINX_IPV=y
 CUSTOMSERVERNAME='y'
 CUSTOMSERVERSTRING='nginx admin'
 
 HN=$(uname -n)
-
-if [ -f /proc/user_beancounters ]; then
-    # CPUS='1'
-    # MAKETHREADS=" -j$CPUS"
-    # speed up make
-    CPUS=`cat "/proc/cpuinfo" | grep "processor"|wc -l`
-    CPUS=$(echo $CPUS+1 | bc)
-    MAKETHREADS=" -j$CPUS"
-else
-    # speed up make
-    CPUS=`cat "/proc/cpuinfo" | grep "processor"|wc -l`
-    CPUS=$(echo $CPUS+1 | bc)
-    MAKETHREADS=" -j$CPUS"
-fi
 
 # compiler related
 CLANG='y'                     # Nginx and LibreSSL
@@ -33,12 +20,10 @@ NGINX_PCREVER='8.37'         # Version of PCRE used for pcre-jit support in Ngin
 ##################################
 ## Nginx SSL options
 # OpenSSL
-NOSOURCEOPENSSL='y'        # set to 'y' to disable OpenSSL source compile for system default YUM package setup
 OPENSSL_VERSION='1.0.2d'   # Use this version of OpenSSL http://openssl.org/
-CLOUDFLARE_PATCHSSL='n'    # set 'y' to implement Cloudflare's kill RC4 patch https://github.com/cloudflare/sslconfig
 
 # LibreSSL
-LIBRESSL_SWITCH='y'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
+LIBRESSL_SWITCH='n'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
 LIBRESSL_VERSION='2.2.4'   # Use this version of LibreSSL http://www.libressl.org/
 ##################################
 
@@ -184,11 +169,6 @@ else
 		PCREJITOPT=""
 	fi
 fi
-# disable Clang compiler for Nginx if NGINX_PASSENGER=y as Clang fails
-# to compile Passenger Nginx Module while GCC compiler works
-if [[ "$NGINX_PASSENGER" = [yY] ]]; then
-	CLANG='n'
-fi
 if [[ -d "${DIR_TMP}/nginx-${NGINX_VERSION}" && ! "$ngver" ]]; then
 	cd ${DIR_TMP}/nginx-${NGINX_VERSION}
 fi
@@ -206,43 +186,7 @@ if [ -f src/http/ngx_http_header_filter_module.c ]; then
 		echo ""
 	fi
 fi
-if [[ ! -f /usr/bin/jemalloc.sh || ! -d /usr/include/jemalloc ]]; then
-	yum -y install jemalloc jemalloc-devel
-fi
-# NGINX 1.9 stream support & 1.8 threads
-# http://nginx.org/en/docs/stream/ngx_stream_core_module.html
-NGXINSTALL_VER=$(echo $NGINX_VERSION | cut -d . -f1,2)
-NGXUPGRADE_VER=$(echo $ngver | cut -d . -f1,2)
-if [[ "$ngver" && "$NGXUPGRADE_VER" = '1.9' ]]; then
-	if [[ "$NGINX_STREAM" = [yY] ]]; then
-		STREAM=' --with-stream --with-stream_ssl_module'
-	else
-		STREAM=""
-	fi
-	THREADS=' --with-threads'
-	# workaround for nginx 1.9 compatibility
-	# sed -i.bak 's|ngx_http_set_connection_log|ngx_set_connection_log|g' ${DIR_TMP}/lua-nginx-module-${ORESTY_LUANGINXVER}/src/ngx_http_lua_initworkerby.c
-	# sed -i.bak 's|ngx_http_set_connection_log|ngx_set_connection_log|g' ${DIR_TMP}/lua-nginx-module-${ORESTY_LUANGINXVER}/src/ngx_http_lua_timer.c
-elif [[ -z "$ngver" && "$NGXINSTALL_VER" = '1.9' ]]; then
-	if [[ "$NGINX_STREAM" = [yY] ]]; then
-		STREAM=' --with-stream --with-stream_ssl_module'
-	else
-		STREAM=""
-	fi
-	THREADS=' --with-threads'
-	# workaround for nginx 1.9 compatibility
-	# sed -i.bak 's|ngx_http_set_connection_log|ngx_set_connection_log|g' ${DIR_TMP}/lua-nginx-module-${ORESTY_LUANGINXVER}/src/ngx_http_lua_initworkerby.c
-	# sed -i.bak 's|ngx_http_set_connection_log|ngx_set_connection_log|g' ${DIR_TMP}/lua-nginx-module-${ORESTY_LUANGINXVER}/src/ngx_http_lua_timer.c	
-elif [[ "$ngver" && "$NGXUPGRADE_VER" = '1.8' ]]; then
-	STREAM=""
-	THREADS=' --with-threads'
-elif [[ -z "$ngver" && "$NGXINSTALL_VER" = '1.8' ]]; then
-	STREAM=""
-	THREADS=' --with-threads'	
-else
-	STREAM=""
-	THREADS=""
-fi
+
 # intel specific
 CPUVENDOR=$(cat /proc/cpuinfo | awk '/vendor_id/ {print $3}' | sort -u | head -n1)
 gcc -c -Q -march=native --help=target | egrep '\[enabled\]|mtune|march' | tee ${CENTMINLOGDIR}/gcc_native.log
@@ -278,15 +222,15 @@ else
 fi
 #    ASK "Would you like to compile nginx with IPv6 support? [y/n] "
 #    if [[ "$asknginxipv" = [yY] ]]; then
-      if [[ "$asknginxipv" = [yY] || "$NGINX_IPV" = [yY] ]]; then
+      if [[ "$NGINX_IPV" = [yY] ]]; then
       	pwd
       	echo "nginx configure options:"
-      	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module ${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT} ${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
-		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin/nginx --conf-path=/usr/local/nginx/conf/nginx.conf${NGINX_DEBUGOPT} --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --with-http_stub_status_module --with-http_realip_module${GEOIPOPT} --with-openssl-opt="enable-tlsext"${VTSOPT} ${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+      	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
     else
     	pwd
     	echo "nginx configure options:"
-    	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin/nginx --conf-path=/usr/local/nginx/conf/nginx.conf --with-http_ssl_module${HTTPTWOOPT} --with-http_gzip_static_module --with-http_stub_status_module ${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
-		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin/nginx --conf-path=/usr/local/nginx/conf/nginx.conf${NGINX_DEBUGOPT} --with-http_ssl_module${HTTPTWOOPT} --with-http_stub_status_module ${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}{OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+    	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro${LUALD_OPT}" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}{OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
     fi   
 }
