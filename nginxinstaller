@@ -279,7 +279,7 @@ output = proc.communicate()
 proc = subprocess.Popen("chkconfig --add nginx", shell=True)
 output = proc.communicate()
 
-proc = subprocess.Popen(../nginxconfigure, shell=True, cwd=nsrcpath, stdout=None)
+proc = subprocess.Popen("../nginxconfigure", shell=True, cwd=nsrcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("make > /dev/null 2>&1", shell=True, cwd=nsrcpath, stdout=None)
 output = proc.communicate()
