@@ -157,7 +157,7 @@ else:
 
 srcpath=currentdir
 print srcpath
-nsrcpath = currentdir + "/nginx-1.8.0"
+nsrcpath = currentdir + "/nginx-1.9.6"
 ssrcpath = currentdir + "/setuptools-5.7"
 
 apache_version = findapacheversion()
@@ -268,7 +268,7 @@ output = proc.communicate()
 proc = subprocess.Popen("chmod +x /scripts/postwwwacct", shell=True)
 output = proc.communicate()
 
-proc = subprocess.Popen("tar -zxf pcre-8.35.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+proc = subprocess.Popen("tar -zxf pcre-8.37.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("tar -zxf openssl-1.0.2d.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
