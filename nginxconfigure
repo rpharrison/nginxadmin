@@ -1,18 +1,18 @@
 #!/bin/sh
 
-NGINX_IPV=y
-CUSTOMSERVERNAME='y'
+NGINX_IPV=n
+CUSTOMSERVERNAME='n'
 CUSTOMSERVERSTRING='nginx admin'
 
 HN=$(uname -n)
 
 # compiler related
-CLANG='y'                     # Nginx and LibreSSL
+CLANG='n'                     # Nginx and LibreSSL
 NGINX_HTTP2=y                # Nginx http/2 patch https://community.centminmod.com/threads/4127/
 NGINX_SPDY=n                 # Nginx SPDY support
 NGINX_FLV=y                  # http://nginx.org/en/docs/http/ngx_http_flv_module.html
 NGINX_MP4=y                  # Nginx MP4 Module http://nginx.org/en/docs/http/ngx_http_mp4_module.html
-NGINX_VHOSTSTATS=y           # https://github.com/vozlt/nginx-module-vts
+NGINX_VHOSTSTATS=n           # https://github.com/vozlt/nginx-module-vts
 NGINX_PCREJIT=y              # Nginx configured with pcre & pcre-jit support
 NGINX_PCREVER='8.37'         # Version of PCRE used for pcre-jit support in Nginx
 
@@ -22,7 +22,7 @@ NGINX_PCREVER='8.37'         # Version of PCRE used for pcre-jit support in Ngin
 OPENSSL_VERSION='1.0.2d'   # Use this version of OpenSSL http://openssl.org/
 
 # LibreSSL
-LIBRESSL_SWITCH='y'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
+LIBRESSL_SWITCH='n'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
 LIBRESSL_VERSION='2.2.4'   # Use this version of LibreSSL http://www.libressl.org/
 ##################################
 
@@ -121,24 +121,6 @@ function funct_nginxconfigure {
 	else
 		PCREJITOPT=""
 	fi
-
-if [[ -d "${DIR_TMP}/nginx-${NGINX_VERSION}" && ! "$ngver" ]]; then
-	cd ${DIR_TMP}/nginx-${NGINX_VERSION}
-fi
-if [[ -d "${DIR_TMP}/nginx-${ngver}" && "$ngver" ]]; then
-	cd ${DIR_TMP}/nginx-${ngver}
-fi
-if [ -f src/http/ngx_http_header_filter_module.c ]; then
-	if [[ "$CUSTOMSERVERNAME" == [yY] ]]; then
-		echo ""
-		echo "Check existing server string:"
-	grep "Server: " src/http/ngx_http_header_filter_module.c | grep -v full_string
-		echo ""
-		echo "Change server string to $CUSTOMSERVERSTRING"
-	sed -i "s/Server: nginx/Server: $CUSTOMSERVERSTRING/g" src/http/ngx_http_header_filter_module.c
-		echo ""
-	fi
-fi
 
 # intel specific
 CPUVENDOR=$(cat /proc/cpuinfo | awk '/vendor_id/ {print $3}' | sort -u | head -n1)
