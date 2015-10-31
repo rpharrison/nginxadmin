@@ -275,9 +275,6 @@ output = proc.communicate()
 proc = subprocess.Popen("tar -zxf libressl-2.2.4.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("tar -zxf nginx-1.9.6.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
-=======
-proc = subprocess.Popen("tar -zxf nginx-1.8.0.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
->>>>>>> refs/remotes/origin/master
 output = proc.communicate()
 proc = subprocess.Popen("chkconfig --add nginx", shell=True)
 output = proc.communicate()
