@@ -1,6 +1,6 @@
 #!/bin/sh
 
-NGINX_IPV=n
+NGINX_IPV=y
 CUSTOMSERVERNAME='n'
 CUSTOMSERVERSTRING='nginx admin'
 
