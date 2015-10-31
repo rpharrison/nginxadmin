@@ -270,7 +270,6 @@ output = proc.communicate()
 
 proc = subprocess.Popen("tar -zxf pcre-8.35.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
-<<<<<<< HEAD
 proc = subprocess.Popen("tar -zxf openssl-1.0.2d.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("tar -zxf libressl-2.2.4.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
