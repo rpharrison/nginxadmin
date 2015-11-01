@@ -125,11 +125,11 @@ if len(sys.argv) > 1:
 	elif sys.argv[1] == "install":
 		pass
 	else:	
-		print "Usage ./nginxinstaller [install | uninstall]" 
+		print "Usage ./nginstaller [install | uninstall]" 
 		sys.exit()
 
 if len(sys.argv) == 1:
-	print "Usage ./nginxinstaller [install | uninstall]"
+	print "Usage ./nginstaller [install | uninstall]"
 	sys.exit()
 
 
@@ -161,8 +161,6 @@ nsrcpath = currentdir + "/nginx-1.9.6"
 ssrcpath = currentdir + "/setuptools-5.7"
 
 apache_version = findapacheversion()
-
-nginxconfigure = """ ./configure --with-http_flv_module --with-ipv6 --with-http_mp4_module --with-pcre=%s/pcre-8.37 --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_realip_module --with-http_ssl_module --with-http_v2_module --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module > /dev/null 2>&1""" % (srcpath)
 
 print "Welcome to the Nginx Admin installer......Starting Install"
 print "Please Wait ......."
@@ -272,12 +270,16 @@ output = proc.communicate()
 
 proc = subprocess.Popen("tar -zxf pcre-8.37.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
+proc = subprocess.Popen("tar -zxf openssl-1.0.2d.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+output = proc.communicate()
+proc = subprocess.Popen("tar -zxf libressl-2.2.4.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+output = proc.communicate()
 proc = subprocess.Popen("tar -zxf nginx-1.9.6.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("chkconfig --add nginx", shell=True)
 output = proc.communicate()
 
-proc = subprocess.Popen(nginxconfigure, shell=True, cwd=nsrcpath, stdout=None)
+proc = subprocess.Popen("../nginxconfigure", shell=True, cwd=nsrcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("make > /dev/null 2>&1", shell=True, cwd=nsrcpath, stdout=None)
 output = proc.communicate()
