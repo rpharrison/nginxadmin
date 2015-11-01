@@ -7,7 +7,7 @@ CUSTOMSERVERSTRING='nginx admin'
 HN=$(uname -n)
 
 # compiler related
-CLANG='n'                     # Nginx and LibreSSL
+CLANG='y'                     # Nginx and LibreSSL
 NGINX_HTTP2=y                # Nginx http/2 patch https://community.centminmod.com/threads/4127/
 NGINX_SPDY=n                 # Nginx SPDY support
 NGINX_FLV=y                  # http://nginx.org/en/docs/http/ngx_http_flv_module.html
