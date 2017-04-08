@@ -222,7 +222,7 @@ proc = subprocess.Popen("chmod +x /scripts/xmlapi.py", shell=True)
 output = proc.communicate()
 
 if not apache_version.startswith("2.4."):
-        proc = subprocess.Popen("tar zxf mod_rpaf-0.8.4.tar.gz", shell=True, cwd=srcpath)
+        proc = subprocess.Popen("tar zxf mod_rpaf-0.8.5-rc1.tar.gz", shell=True, cwd=srcpath)
         output = proc.communicate()
 
 proc = subprocess.Popen("cp /" + currentdir + "/installmodrpaf /scripts/ > /dev/null 2>&1", shell=True)
@@ -268,9 +268,9 @@ output = proc.communicate()
 proc = subprocess.Popen("chmod +x /scripts/postwwwacct", shell=True)
 output = proc.communicate()
 
-proc = subprocess.Popen("tar -zxf pcre-8.37.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+proc = subprocess.Popen("tar -zxf pcre-8.40.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
-proc = subprocess.Popen("tar -zxf openssl-1.0.2d.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
+proc = subprocess.Popen("tar -zxf openssl-1.1.0e.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
 proc = subprocess.Popen("tar -zxf libressl-2.2.4.tar.gz > /dev/null 2>&1", shell=True, cwd=srcpath, stdout=None)
 output = proc.communicate()
@@ -340,7 +340,7 @@ if apache_version.startswith("2.4.") and os.path.exists("/var/cpanel/templates/a
         output = proc.communicate()
 else:
         print "Installing mod_rpaf..."
-        proc = subprocess.Popen("/usr/local/apache/bin/apxs -i -c -n mod_rpaf.so mod_rpaf.c > /dev/null 2>&1", shell=True, cwd=srcpath + "/mod_rpaf-0.8.4")
+        proc = subprocess.Popen("/usr/local/apache/bin/apxs -i -c -n mod_rpaf.so mod_rpaf.c > /dev/null 2>&1", shell=True, cwd=srcpath + "/mod_rpaf-0.8.5-rc1")
         output = proc.communicate()
 
 print "Updating cPanel Configuration"

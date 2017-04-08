@@ -14,12 +14,12 @@ NGINX_FLV=y                  # http://nginx.org/en/docs/http/ngx_http_flv_module
 NGINX_MP4=y                  # Nginx MP4 Module http://nginx.org/en/docs/http/ngx_http_mp4_module.html
 NGINX_VHOSTSTATS=n           # https://github.com/vozlt/nginx-module-vts
 NGINX_PCREJIT=y              # Nginx configured with pcre & pcre-jit support
-NGINX_PCREVER='8.37'         # Version of PCRE used for pcre-jit support in Nginx
+NGINX_PCREVER='8.40'         # Version of PCRE used for pcre-jit support in Nginx
 
 ##################################
 ## Nginx SSL options
 # OpenSSL
-OPENSSL_VERSION='1.0.2d'   # Use this version of OpenSSL http://openssl.org/
+OPENSSL_VERSION='1.1.0e'   # Use this version of OpenSSL http://openssl.org/
 
 # LibreSSL
 LIBRESSL_SWITCH='n'        # if set to 'y' it overrides OpenSSL as the default static compiled option for Nginx server
@@ -151,8 +151,8 @@ fi
       if [[ "$NGINX_IPV" = [yY] ]]; then
       	pwd
       	echo "nginx configure options:"
-      	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}"
-		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-ipv6 --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
+      	echo "./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}"
+		./configure --with-ld-opt="${LRT}-ljemalloc -Wl,-z,relro" --with-cc-opt="${MTUNEOPT}-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2${CLANG_CCOPT}" --sbin-path=/usr/local/sbin --conf-path=/etc/nginx/nginx.conf --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module${HTTPTWOOPT} --http-client-body-temp-path=/tmp/nginx_client --http-proxy-temp-path=/tmp/nginx_proxy --http-fastcgi-temp-path=/tmp/nginx_fastcgi --with-http_stub_status_module${FLVOPT}${MPOPT} --with-http_realip_module --with-openssl-opt="enable-tlsext"${VTSOPT}${OPENSSLOPT}${LIBRESSLOPT}${PCREJITOPT}${SPDYOPT}
     else
     	pwd
     	echo "nginx configure options:"
